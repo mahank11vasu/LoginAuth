@@ -10,7 +10,7 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.get("/users", protect, getUsers);
 router.put("/users/:id", protect, upload.single("image"), updateUser); 
-router.get("/session", protect, getUserSession); 
+router.get("/session", getUserSession);
 
 
 export default router;

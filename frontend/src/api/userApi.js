@@ -32,7 +32,6 @@ export const logoutUser = async() => {
     await axios.post(`${API_URL}${import.meta.env.VITE_LOGOUT}`, {}, {withCredentials: true});
 };
 
-const getAuthToken = () => localStorage.getItem("token");
 
 export const getUsers = async () => {
     const response = await axios.get(`${API_URL}/api/users/users`, { withCredentials: true });

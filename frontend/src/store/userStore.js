@@ -7,12 +7,16 @@ const useUserStore = create((set) => ({
 
   fetchSession: async () => {
     try {
-      const userData = await getUserSession();
-      set({ user: userData, isLoading: false });
+        const userData = await getUserSession();
+        if (!userData) {
+            set({ user: null, isLoading: false });
+        } else {
+            set({ user: userData, isLoading: false });
+        }
     } catch (error) {
-      set({ user: null, isLoading: false });
+        set({ user: null, isLoading: false }); 
     }
-  },
+},
 
   login: (userData) => {
     set({ user: userData });

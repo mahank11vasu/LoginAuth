@@ -1,6 +1,5 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import jwt from 'jsonwebtoken';
 import { validateUser } from "../middleware/validateUser.js";
 import fs from "fs";
 import path from "path";
@@ -28,17 +27,15 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const token = generateToken(user._id);
-
-        res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "strict", maxAge: 3600000 });
-
-        res.status(200).json({
+        req.session.user ={
             _id: user._id,
             username: user.username,
             email: user.email,
-            role: user.role,
-            token,
-        });
+            role: user.role,    
+        }
+
+        res.status(200).json({message: "Login successful", user: req.session.user});
+
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).json({ message: "Server error", error: error.message });
@@ -46,8 +43,18 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-    res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
-    res.status(200).json({ message: "Logged out successfully" });
+    req.session.destroy((err) => {
+        if (err) return res.status(500).json({ message: "Logout failed" });
+        res.clearCookie("connect.sid");
+        res.status(200).json({ message: "Logged out successfully" });
+    });
+};
+
+export const getUserSession = (req, res) => {
+    if (!req.session.user) {
+        return res.status(200).json(null); 
+    }
+    res.status(200).json(req.session.user);
 };
 
 export const registerUser = async(req, res) => {
@@ -134,24 +141,7 @@ export const updateUser = async (req, res) => {
 
 
 
-export const getUserSession = async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(200).json(null);  
-        }
 
-        const user = await User.findById(req.user.userId).select("-password");
-
-        if (!user) {
-            return res.status(200).json(null);  
-        }
-
-        res.status(200).json(user);
-    } catch (error) {
-        console.error("Session Fetch Error:", error);
-        res.status(500).json({ message: "Error fetching session", error: error.message });
-    }
-};
 
 
 
